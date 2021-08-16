@@ -19,3 +19,11 @@ main > h1 {
   text-align: center;
   font-size: 3.5em;
 }
+
+#drop-area {
+  border: 2px dashed #ccc;
+  border-radius: 20px;
+}
+#drop-area.highlight {
+  border-color: purple;
+}

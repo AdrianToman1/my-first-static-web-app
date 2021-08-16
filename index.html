@@ -1,66 +1,180 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Vanilla JavaScript App</title>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="styles.css">
-  <title>Vanilla JavaScript App</title>
-  <script>
-    function slackJsonToText() {
-      let slackPosts = JSON.parse(document.getElementById("input").value);
-      let htmls = [];
+    <script>
+      let jsonFiles = [];
 
-      slackPosts.forEach(element => {
-        let html = "<div><div><b>" + element.user_profile?.display_name + "</b></div><div>" + element.text + "</div></div>"; 
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
 
-        htmls.push(html);
-      });
+      function highlight(e) {
+        dropArea.classList.add("highlight");
+      }
 
-      document.getElementById("output").innerHTML = htmls.join("");
-    }
+      function unhighlight(e) {
+        dropArea.classList.remove("active");
+      }
 
-    function copyText() {    
+      function handleDrop(e) {
+        var dt = e.dataTransfer;
+        var files = dt.files;
+
+        handleFiles(files);
+      }
+
+      function handleFiles(files) {
+        jsonFiles = [...jsonFiles, ...files];
+
+        var promises = [];
+        for (var i = 0; i < jsonFiles.length; i++) {
+          promises.push(readFileAndAddToMap(jsonFiles[i]));
+        }
+
+        Promise.all(promises)
+          .then((results) => {
+            var slackPosts = [];
+
+            for (result of results) {
+              slackPosts = [...slackPosts, ...result];
+            }
+
+            document.getElementById("input").value = JSON.stringify(slackPosts);
+            slackJsonToText();
+          })
+          .catch(function (error) {
+            //handle potential error
+          });
+      }
+
+      function readFileAndAddToMap(file) {
+        return new Promise(function (resolve, reject) {
+          var reader = new FileReader();
+          reader.onloadend = () => {
+            resolve([...JSON.parse(reader.result)]);
+          };
+          reader.onerror = function (error) {
+            reject(error);
+          };
+          reader.readAsText(file);
+        });
+      }
+
+      function slackJsonToText() {
+        let slackPosts = JSON.parse(document.getElementById("input").value);
+        let htmls = [];
+
+        slackPosts.forEach((element) => {
+          let html =
+            "<div><div><b>" +
+            element.user_profile?.display_name +
+            "</b></div><div>" +
+            element.text +
+            "</div></div>";
+
+          htmls.push(html);
+        });
+
+        document.getElementById("output").innerHTML = htmls.join("");
+      }
+
+      function copyText() {
         const el = document.createElement("textarea");
         el.value = document.getElementById("output").innerHTML;
         document.body.appendChild(el);
         el.select();
         document.execCommand("copy");
         document.body.removeChild(el);
-   }
+      }
 
-   function selectAll() {
-    var sel, range;
-	var el = document.getElementById("output"); //get element id
-	if (window.getSelection && document.createRange) { //Browser compatibility
-	  sel = window.getSelection();
-	  if(sel.toString() == ''){ //no text selection
-		 window.setTimeout(function(){
-			range = document.createRange(); //range object
-			range.selectNodeContents(el); //sets Range
-			sel.removeAllRanges(); //remove all ranges from selection
-			sel.addRange(range);//add Range to a Selection.
-		},1);
-	  }
-	}else if (document.selection) { //older ie
-		sel = document.selection.createRange();
-		if(sel.text == ''){ //no text selection
-			range = document.body.createTextRange();//Creates TextRange object
-			range.moveToElementText(el);//sets Range
-			range.select(); //make selection.
-		}
-	}}
+      function selectAll() {
+        var sel, range;
+        var el = document.getElementById("output"); //get element id
+        if (window.getSelection && document.createRange) {
+          //Browser compatibility
+          sel = window.getSelection();
+          if (sel.toString() == "") {
+            //no text selection
+            window.setTimeout(function () {
+              range = document.createRange(); //range object
+              range.selectNodeContents(el); //sets Range
+              sel.removeAllRanges(); //remove all ranges from selection
+              sel.addRange(range); //add Range to a Selection.
+            }, 1);
+          }
+        } else if (document.selection) {
+          //older ie
+          sel = document.selection.createRange();
+          if (sel.text == "") {
+            //no text selection
+            range = document.body.createTextRange(); //Creates TextRange object
+            range.moveToElementText(el); //sets Range
+            range.select(); //make selection.
+          }
+        }
+      }
+    </script>
+  </head>
+
+  <body>
+    <main>
+      <h3>Slack To Text</h3>
+      <div style="display: flex">
+        <div style="width: 50%; padding: 10px" id="drop-area">
+          <div>Slack JSON:</div>
+          <input
+            type="file"
+            id="upload"
+            multiple
+            onchange="handleFiles(this.files)"
+          />
+          <div style="padding: 2px">
+            <textarea
+              id="input"
+              style="width: 100%; min-height: 400px"
+              oninput="slackJsonToText();"
+            ></textarea>
+          </div>
+        </div>
+        <div style="width: 50%; padding: 10px">
+          <div><button onclick="selectAll();">Select All</button></div>
+          <div
+            id="output"
+            style="
+              padding: 2px;
+              border: 1px dashed black;
+              width: 100%;
+              min-height: 400px;
+            "
+          ></div>
+        </div>
+      </div>
+    </main>
+  </body>
+  <script>
+    let dropArea = document.getElementById("drop-area");
+
+    // Prevent default drag behaviors
+    ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+      dropArea.addEventListener(eventName, preventDefaults, false);
+      document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    // Highlight drop area when item is dragged over it
+    ["dragenter", "dragover"].forEach((eventName) => {
+      dropArea.addEventListener(eventName, highlight, false);
+    });
+    ["dragleave", "drop"].forEach((eventName) => {
+      dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    // Handle dropped files
+    dropArea.addEventListener("drop", handleDrop, false);
   </script>
-</head>
-
-<body>
-  <main>
-    <h3>Slack To Text</h3>
-    <div style="display: flex;">
-      <div style="width: 50%; padding: 10px;"><div>Paste Slack JSON in here</div><div style="padding: 2px;"><textarea id="input" style="width: 100%; min-height: 400px;" oninput="slackJsonToText();"></textarea></div></div>
-      <div style="width: 50%; padding: 10px;"><div><button onclick="selectAll();">Select All</button></div><div id="output" style="padding: 2px; border: 1px dashed black; width: 100%; min-height: 400px"></div></div>
-    </div>
-  </main>
-</body>
-
 </html>
