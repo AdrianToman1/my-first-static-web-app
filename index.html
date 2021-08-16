@@ -15,6 +15,12 @@
     <script>
       let jsonFiles = [];
 
+      function clearAll() {
+        console.log('stuff');
+        jsonFiles = [];
+        handleFiles([]);
+      }
+
       function preventDefaults(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -156,7 +162,8 @@
       <h3>Slack To Text</h3>
       <div style="display: flex">
         <div style="width: 50%; padding: 10px" id="drop-area">
-          <div>Slack JSON:</div>
+          <div>Slack JSON</div>
+          <div><button onclick="clearAll();">Clear</button></div>
           <input
             type="file"
             id="upload"
