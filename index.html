@@ -16,7 +16,6 @@
       let jsonFiles = [];
 
       function clearAll() {
-        console.log('stuff');
         jsonFiles = [];
         handleFiles([]);
       }
@@ -93,10 +92,11 @@
         let userDict = {}
 
         slackPosts.forEach((slackPost) => {
-          userDict[slackPost.user] = slackPost.user_profile;
+          if (!userDict.hasOwnProperty(slackPost.user) && slackPost.user_profile) {
+            userDict[slackPost.user] = slackPost.user_profile;
+          }
         });
          
-
         let htmls = [];
 
         slackPosts.forEach((slackPost) => {
