@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="styles.css" />
     <title>Vanilla JavaScript App</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
 
     <script>
       let jsonFiles = [];
@@ -32,8 +38,17 @@
       function handleFiles(files) {
         jsonFiles = [...jsonFiles, ...files];
 
+        let fileList = document.getElementById("file-list");
+
+        if (jsonFiles.length === 0) {
+          fileList.innerHTML = "No Files";
+        } else {
+          fileList.innerHTML = "";
+        }
+
         var promises = [];
         for (var i = 0; i < jsonFiles.length; i++) {
+          fileList.innerHTML += jsonFiles[i].name + "<br />";
           promises.push(readFileAndAddToMap(jsonFiles[i]));
         }
 
@@ -134,12 +149,59 @@
             multiple
             onchange="handleFiles(this.files)"
           />
-          <div style="padding: 2px">
-            <textarea
-              id="input"
-              style="width: 100%; min-height: 400px"
-              oninput="slackJsonToText();"
-            ></textarea>
+          <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="home-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#file-list"
+                type="button"
+                role="tab"
+                aria-controls="file-list"
+                aria-selected="true"
+              >
+                Files
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="profile-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#profile"
+                type="button"
+                role="tab"
+                aria-controls="profile"
+                aria-selected="false"
+              >
+                JSON
+              </button>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <div
+              class="tab-pane fade show active"
+              id="file-list"
+              role="tabpanel"
+              aria-labelledby="home-tab"
+            >
+            No files
+            </div>
+            <div
+              class="tab-pane fade"
+              id="profile"
+              role="tabpanel"
+              aria-labelledby="profile-tab"
+            >
+              <div style="padding: 2px">
+                <textarea
+                  id="input"
+                  style="width: 100%; min-height: 400px"
+                  oninput="slackJsonToText();"
+                ></textarea>
+              </div>
+            </div>
           </div>
         </div>
         <div style="width: 50%; padding: 10px">
@@ -157,6 +219,11 @@
       </div>
     </main>
   </body>
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"
+  ></script>
   <script>
     let dropArea = document.getElementById("drop-area");
 
