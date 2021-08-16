@@ -81,16 +81,30 @@
         });
       }
 
-      function slackJsonToText() {
+      function slackJsonToText() { 
         let slackPosts = JSON.parse(document.getElementById("input").value);
+
+        let userDict = {}
+
+        slackPosts.forEach((slackPost) => {
+          userDict[slackPost.user] = slackPost.user_profile;
+        });
+         
+
         let htmls = [];
 
-        slackPosts.forEach((element) => {
+        slackPosts.forEach((slackPost) => {
+          let text =  slackPost.text;
+
+          for (var key in userDict) {
+            text = text.replace(`<@${key}>`, userDict[key].display_name);
+          }
+
           let html =
             "<div><div><b>" +
-            element.user_profile?.display_name +
+              slackPost.user_profile?.display_name +
             "</b></div><div>" +
-            element.text +
+              text +
             "</div></div>";
 
           htmls.push(html);
