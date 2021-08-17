@@ -86,46 +86,40 @@
         });
       }
 
-      function slackJsonToText() { 
+      function slackJsonToText() {
         let slackPosts = JSON.parse(document.getElementById("input").value);
 
-        let userDict = {}
+        let userDict = {};
 
         slackPosts.forEach((slackPost) => {
-          if (!userDict.hasOwnProperty(slackPost.user) && slackPost.user_profile) {
+          if (
+            !userDict.hasOwnProperty(slackPost.user) &&
+            slackPost.user_profile
+          ) {
             userDict[slackPost.user] = slackPost.user_profile;
           }
         });
-         
+
         let htmls = [];
 
         slackPosts.forEach((slackPost) => {
-          let text =  slackPost.text;
+          let text = slackPost.text;
 
           for (var key in userDict) {
             text = text.replace(`<@${key}>`, userDict[key].display_name);
           }
 
           let html =
-            "<div><div><b>" +
-              slackPost.user_profile?.display_name +
-            "</b></div><div>" +
-              text +
+            "<div><div style='font-weight: bold;'>" +
+            slackPost.user_profile?.display_name +
+            "</div><div>" +
+            text +
             "</div></div>";
 
           htmls.push(html);
         });
 
         document.getElementById("output").innerHTML = htmls.join("");
-      }
-
-      function copyText() {
-        const el = document.createElement("textarea");
-        el.value = document.getElementById("output").innerHTML;
-        document.body.appendChild(el);
-        el.select();
-        document.execCommand("copy");
-        document.body.removeChild(el);
       }
 
       function selectAll() {
@@ -207,7 +201,7 @@
               role="tabpanel"
               aria-labelledby="home-tab"
             >
-            No files
+              No files
             </div>
             <div
               class="tab-pane fade"
@@ -226,7 +220,9 @@
           </div>
         </div>
         <div style="width: 50%; padding: 10px">
-          <div><button onclick="selectAll();">Select All</button></div>
+          <div>
+            <button onclick="selectAll();">Select All</button>
+          </div>
           <div
             id="output"
             style="
